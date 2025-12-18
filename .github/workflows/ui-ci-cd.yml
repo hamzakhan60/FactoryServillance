@@ -1,0 +1,94 @@
+name: FYP-UI-Project CI/CD Pipeline
+
+# Trigger on push and pull requests to main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job 1: Build and Test
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # Setup Node.js environment
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      # Install project dependencies
+      - name: Install dependencies
+        run: npm install
+      
+      # Build the React UI application
+      - name: Build UI project
+        run: npm run build
+      
+      # Start the application in background for testing
+      - name: Start application
+        run: npm start &
+        env:
+          CI: true
+      
+      # Wait for application to be ready
+      - name: Wait for application to start
+        run: npx wait-on http://localhost:3000 --timeout 60000
+      
+      # Install Testim CLI globally
+      - name: Install Testim CLI
+        run: npm install -g @testim/cli
+      
+      # Run Dashboard UI Regression Tests
+      - name: Run Dashboard UI Regression Tests
+        run: testim --project "FYP-UI-Project" --suite "Dashboard-UI-Regression" --token ${{ secrets.TESTIM_TOKEN }}
+        continue-on-error: false
+      
+      # Run Live Monitoring UI Regression Tests
+      - name: Run Live Monitoring UI Regression Tests
+        run: testim --project "FYP-UI-Project" --suite "LiveMonitoring-UI-Regression" --token ${{ secrets.TESTIM_TOKEN }}
+        continue-on-error: false
+  
+  # Job 2: Deployment (runs only if all tests pass)
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+      
+      # Build for production
+      - name: Build production bundle
+        run: npm run build
+      
+      # Deployment placeholder - customize based on your deployment target
+      - name: Deploy to production
+        run: |
+          echo "Deploying FYP-UI-Project to production..."
+          # Add your deployment commands here
+          # Examples: AWS S3, Vercel, GitHub Pages, etc.
