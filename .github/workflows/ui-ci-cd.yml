@@ -47,7 +47,7 @@ jobs:
 
       # 7️⃣ Run all UI Regression Tests (Dashboard + LiveMonitoring)
       - name: Run All UI Regression Tests
-        run: npx @testim/testim-cli run --project "cuilahore" --tag "Regression" --token ${{ secrets.TESTIM_TOKEN }}
+        run: npx @testim/testim-cli run --project "cuilahore" --tag "Regression" --token ${{ secrets.SCD }}
         continue-on-error: false
 
   deploy:
