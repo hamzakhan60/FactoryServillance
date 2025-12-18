@@ -41,13 +41,13 @@ jobs:
         env:
           CI: true
 
-      # 6️⃣ Wait for application to start
+      # 6️⃣ Wait for application to be ready
       - name: Wait for application to start
         run: npx wait-on https://factory-servillance.vercel.app/ --timeout 60000
 
       # 7️⃣ Run all UI Regression Tests (Dashboard + LiveMonitoring)
       - name: Run All UI Regression Tests
-        run: npx @testim/testim-cli run --project "cuilahore" --tag "Regression" --token ${{ secrets.SCD }}
+        run: npx @testim/testim-cli --project "cuilahore" --tag "Regression" --token ${{ secrets.SCD }}
         continue-on-error: false
 
   deploy:
@@ -56,28 +56,28 @@ jobs:
     if: success()
 
     steps:
-      # Checkout the repository code
+      # 1️⃣ Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Setup Node.js
+      # 2️⃣ Setup Node.js environment (upgrade to 22 for consistency)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: 'npm'
 
-      # Install dependencies
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Build production bundle
+      # 4️⃣ Build production bundle
       - name: Build production bundle
         run: npm run build
 
-      # Deployment placeholder
+      # 5️⃣ Deployment placeholder
       - name: Deploy to production
         run: |
           echo "Deploying FYP-UI-Project to production..."
-          # Add deployment commands here if needed
+          # Add your deployment commands here if needed
           # Example: AWS S3, Vercel, GitHub Pages
