@@ -1,6 +1,5 @@
 name: FYP-UI-Project CI/CD Pipeline
 
-# Trigger on push and pull requests to main branch
 on:
   push:
     branches: [ main ]
@@ -10,85 +9,46 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [22.x]
 
     steps:
-      # 1️⃣ Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js environment
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      # 3️⃣ Install project dependencies
-      - name: Install dependencies
-        run: npm install
-
-      # 4️⃣ Build the React UI application
-      - name: Build UI project
-        run: npm run build
-
-      # 5️⃣ Start the application in background for testing
-      - name: Start application
-        run: npm start &
-        env:
-          CI: true
-
-      # 6️⃣ Wait for application to be ready
-      - name: Wait for application to start
-        run: npx wait-on https://factory-servillance.vercel.app/ --timeout 60000
-
-      # 7️⃣ Run Dashboard UI Regression Tests
-      - name: Dashboard Page Load Test
-        run: npx @testim/testim-cli "Dashboard_PageLoad" --project "cuilahore" --token ${{ secrets.SCD }}
-      - name: Dashboard Navigation Test
-        run: npx @testim/testim-cli "Dashboard_Navigation" --project "cuilahore" --token ${{ secrets.SCD }}
-      - name: Dashboard Layout Test
-        run: npx @testim/testim-cli "Dashboard_Layout" --project "cuilahore" --token ${{ secrets.SCD }}
-
-      # 8️⃣ Run LiveMonitoring UI Regression Tests
-      - name: LiveMonitoring Page Load Test
-        run: npx @testim/testim-cli "LiveMonitoring_PageLoad" --project "cuilahore" --token ${{ secrets.SCD }}
-      - name: LiveMonitoring Refresh Test
-        run: npx @testim/testim-cli "LiveMonitoring_Refresh" --project "cuilahore" --token ${{ secrets.SCD }}
-      - name: LiveMonitoring SwitchRoute Test
-        run: npx @testim/testim-cli "LiveMonitoring_SwitchRoute" --project "cuilahore" --token ${{ secrets.SCD }}
-
-  deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: success()
-
-    steps:
-      # 1️⃣ Checkout the repository code
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # 2️⃣ Setup Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22.x
-          cache: 'npm'
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Build production bundle
-      - name: Build production bundle
+      - name: Build UI
         run: npm run build
 
-      # 5️⃣ Deployment placeholder
-      - name: Deploy to production
+      - name: Run Testim - Dashboard Page Load
         run: |
-          echo "Deploying FYP-UI-Project to production..."
-          # Add your deployment commands here if needed
-          # Example: AWS S3, Vercel, GitHub Pages
+          npx @testim/testim-cli "Dashboard_PageLoad" \
+            --project "cuilahore" \
+            --token ${{ secrets.SCD }} \
+            --grid default
+
+      - name: Run Testim - Dashboard Navigation
+        run: |
+          npx @testim/testim-cli "Dashboard_Navigation" \
+            --project "cuilahore" \
+            --token ${{ secrets.SCD }} \
+            --grid default
+
+      - name: Run Testim - LiveMonitoring Page Load
+        run: |
+          npx @testim/testim-cli "LiveMonitoring_PageLoad" \
+            --project "cuilahore" \
+            --token ${{ secrets.SCD }} \
+            --grid default
+
+      - name: Run Testim - LiveMonitoring Switch Route
+        run: |
+          npx @testim/testim-cli "LiveMonitoring_SwitchRoute" \
+            --project "cuilahore" \
+            --token ${{ secrets.SCD }} \
+            --grid default
