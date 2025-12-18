@@ -43,7 +43,7 @@ jobs:
 
       # 6️⃣ Wait for application to start
       - name: Wait for application to start
-        run: npx wait-on http://localhost:3000 --timeout 60000
+        run: npx wait-on https://factory-servillance.vercel.app/ --timeout 60000
 
       # 7️⃣ Run all UI Regression Tests (Dashboard + LiveMonitoring)
       - name: Run All UI Regression Tests
